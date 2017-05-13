@@ -25,10 +25,10 @@ $composer install
 
 This will install all the dependencies needed by the hooks.
 
-then you have two ways of installing the hooks.
+Then you have two ways of installing the hooks.
 
 - Manually, by copying the content of the /hooks inside the .git/hooks folder of your project.
-- By running the *install-hooks* script.
+- By running the *install-hooks* script. Don't forget to `chmod +x` the file so it will be executable.
 
 This hooks will run everytime you try to commit your code to your local repository, detected errors will not let you commit the code.
 
