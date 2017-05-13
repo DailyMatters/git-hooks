@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+#Hook that checks for php syntax
+
+#The first grep is used to check for added (A) and modified (M) files
+#Awk strips the extra spaces and data
+#The second grep is used to check if the file names end in .php
+
+php_files=$(git status --short | grep -E '^(A|M)' | awk '{print $2}' | grep -E '\.php$')
+
+
+#Check each php file for syntax errors
+
+#flag for errors
+ERROR_BUFFER=""
+#log file
+logdir="log"
+
+for file in $php_files; do
+   #we need the grep here because the variable gets filled with success messages also
+   php_out=$(php -l "$file" 2>&1 | grep "Parse error")
+
+   if [ "$php_out" != "" ]; then
+        
+        if [ "$ERROR_BUFFER" != "" ]; then
+            ERROR_BUFFER="$ERROR_BUFFER\n$php_out"
+        else
+            ERROR_BUFFER="$php_out"
+        fi    
+
+        echo "Syntax error with ${file}:"
+        echo "$php_out" | grep -E '^Parse error'
+    fi
+done
+   
+#We have errors, log and exit
+if [ "$ERROR_BUFFER" != "" ]; then
+    mkdir -p "$logdir"
+    echo -e $(date)"\n" > "$logdir"/log.txt
+    echo -e "$ERROR_BUFFER" >> "$logdir/"log.txt
+    exit 1
+fi
+
+#Runs with success returns 0 to the hook running script
+exit 0
+
+#We capture the output for php -l which is the php otpion for syntax validation

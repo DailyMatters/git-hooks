@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+# Git pre-commit hook that runs multiple hooks from the /hooks folder
+
+##################################################################
+#
+# Configuration
+#
+# For the hooks to be executed they must be in the same .git/hooks folder as this script.
+# Hooks should return 0 if successful and non zero to cancel the commit
+# The hooks to execute should be listed in the following array.
+HOOKS="pre-commit-php-syntax pre-commit-phpcs pre-commit-phpmd"
+###################################################################
+
+CURRENT_PATH="`dirname \"$0"`"
+
+for hook in $HOOKS
+do
+
+    echo "Runnig hook: $hook"
+    
+    #if the hook exists will run it
+    if [ -f "$CURRENT_PATH/$hook"  ]; then
+        "$CURRENT_PATH/$hook"
+        #in case of error in executing the hook
+        if [ $? != 0 ]; then
+            exit 1
+        fi
+    else
+        echo "Error: file $hook not found."
+        echo "Aborting commit. Make sure the hook is in $CURRENT_PATH and executable."
+        echo "You can disable it by removing it from the list in $CURRENT_PATH."
+        echo "You can skip all pre commit hooks with --no-verify (not recommended)."
+        exit 1
+    fi
+done

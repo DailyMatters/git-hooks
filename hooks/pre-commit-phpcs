@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+#Get all modified and added files
+php_files=$(git status --short | grep -E '^(A|M)' | awk '{print $2}' | grep -E '\.php$')
+
+CURRENT_PATH="`pwd`"
+
+if [ "$php_files" != "" ]; then
+
+    #iterate through all files
+    for file in $php_files; do
+
+        echo "Starting code sniffer..."
+        ./vendor/bin/phpcs --standard=PSR1 --encoding=utf8 -n -p $file
+    
+        if [ "$?" != 0 ]; then
+            echo "Please verify the situations above before commiting."
+            exit 1
+        fi
+    
+        echo "Ending code sniffer..."
+
+    done
+
+fi
+
+#Runs with success and returns 0 to the running hooks hook
+exit 0

@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+#Hook that runs phpmd on the modified and added files
+
+#Get all modified and added files
+php_files=$(git status --short | grep -E '^(A|M)' | awk '{print $2}' | grep -E '\.php$')
+
+if [ "$php_files" != "" ]; then
+
+    #runs phpmd for each file
+    echo "Starting phpmd..."
+
+    #iterate through all files
+    for file in $php_files; do
+
+        #runs phpmd for each file
+        #echo "Starting phpmd..."
+
+        ./vendor/bin/phpmd $file text codesize,unusedcode,naming
+
+        if [ "$?" != 0 ]; then
+            echo -e "Please verify the above situations before commiting. \n"
+            exit 1
+        fi
+
+    done
+
+    echo "Ending phpmd..."
+
+fi
+
+exit 0
